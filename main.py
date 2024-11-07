@@ -4,9 +4,9 @@ import telebot
 
 # TOKEN DETAILS
 BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"
-Daily_bonus = 1  # Daily bonus amount
-Mini_Withdraw = 0.5  # Minimum withdrawal amount
-Per_Refer = 0.0001  # Referral bonus amount
+Daily_bonus = 0.2  # Daily bonus amount
+Mini_Withdraw = 3.5  # Minimum withdrawal amount
+Per_Refer = 0.5  # Referral bonus amount
 
 bot = telebot.TeleBot(BOT_TOKEN)
 bonus = {}
@@ -24,6 +24,7 @@ def start(message):
         user = message.chat.id
         user = str(user)
         data = json.load(open('users.json', 'r'))
+        
         if user not in data['referred']:
             data['referred'][user] = 0
             data['total'] = data['total'] + 1
@@ -34,7 +35,22 @@ def start(message):
         if user not in data['wallet']:
             data['wallet'][user] = "none"
         json.dump(data, open('users.json', 'w'))
+        
+        # Send welcome message
         bot.send_message(user, "*Welcome to the bot!*", parse_mode="Markdown")
+        
+        # Ask user to join the required bots
+        join_message = (
+            "*To qualify for a reward, please join the following bots:*\n\n"
+            "1) *Bum* - [Join Now](https://t.me/blum/app?startapp=ref_DWusEZ3TeD)\n"
+            "2) *OKX Racer* - [Join Now](https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953)\n"
+            "3) *Kolo* - [Join Now](https://t.me/kolo?start=ref_7060686316)\n"
+            "4) *NotPixel* - [Join Now](https://t.me/notpixel/app?startapp=f7060686316)\n\n"
+            "*After joining, you can access your rewards!*"
+        )
+        bot.send_message(user, join_message, parse_mode="Markdown")
+        
+        # Send the main menu
         menu(user)
     except Exception as e:
         bot.send_message(message.chat.id, "An error occurred. Please try again later.")
