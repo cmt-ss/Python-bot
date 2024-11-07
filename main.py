@@ -3,7 +3,7 @@ import json
 import telebot
 
 # TOKEN DETAILS
-BOT_TOKEN = "7509635304:AAG5Jr_SQ0-rQeuaq8sbnhQwUWDoJ2niRuk"
+BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"
 Daily_bonus = 1  # Daily bonus amount
 Mini_Withdraw = 0.5  # Minimum withdrawal amount
 Per_Refer = 0.0001  # Referral bonus amount
@@ -74,7 +74,7 @@ def send_text(message):
         elif message.text == '⚙️ Set Wallet':
             keyboard = telebot.types.ReplyKeyboardMarkup(True)
             keyboard.row('🚫 Cancel')
-            send = bot.send_message(user_id, "_⚠️ Send your wallet address._", parse_mode="Markdown", reply_markup=keyboard)
+            send = bot.send_message(user_id, "_⚠️ Send your TRX wallet address._", parse_mode="Markdown", reply_markup=keyboard)
             bot.register_next_step_handler(send, trx_address)
 
         elif message.text == "📊 Statistics":
