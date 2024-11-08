@@ -1,8 +1,7 @@
-import time
 import json
 import telebot
 
-# TOKEN DETAILS
+# Define constants
 BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"
 Daily_bonus = 0.5  # Daily bonus amount
 Mini_Withdraw = 1  # Minimum withdrawal amount
@@ -20,12 +19,10 @@ def menu(user_id):
 
 def join_required(user_id):
     keyboard = telebot.types.InlineKeyboardMarkup()
-    # Each button will have a URL link for the bot invite
     keyboard.add(telebot.types.InlineKeyboardButton("Join Bum", url="https://t.me/blum/app?startapp=ref_DWusEZ3TeD"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join OKX Racer", url="https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join Kolo", url="https://t.me/kolo?start=ref_7060686316"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join NotPixel", url="https://t.me/notpixel/app?startapp=f7060686316"))
-    # Continue button to access rewards only after joining
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
     bot.send_message(user_id, "*To qualify for a reward, please join the following bots:*\n\nClick each link to join, then press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
@@ -37,8 +34,21 @@ def start(message):
         with open('users.json', 'r') as file:
             data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
-        data = {"referred": {}, "referby": {}, "balance": {}, "wallet": {}, "total": 0}
-    
+        data = {
+            "checkin": {},
+            "withd": {},
+            "DailyQuiz": {},
+            "id": {},
+            "total": 0,
+            "referred": {},
+            "referby": {},
+            "balance": {},
+            "wallet": {},
+            "refer": {},
+            "totalwith": 0,
+            "joined": {}
+        }
+
     if user_id not in data['referred']:
         data['referred'][user_id] = 0
         data['total'] += 1
@@ -53,6 +63,8 @@ def start(message):
         data['balance'][user_id] = 0
     if user_id not in data['wallet']:
         data['wallet'][user_id] = "none"
+    if user_id not in data['joined']:
+        data['joined'][user_id] = False  # Initially, the user hasn't joined the bots
 
     with open('users.json', 'w') as file:
         json.dump(data, file)
@@ -64,17 +76,18 @@ def start(message):
 @bot.callback_query_handler(func=lambda call: call.data == "continue")
 def continue_callback(call):
     user_id = str(call.message.chat.id)
-    
-    # Verification logic - If verification API is available, place it here.
-    # For now, let's proceed with a simple prompt assuming user has manually checked
+
+    # Load user data
     with open('users.json', 'r') as file:
         data = json.load(file)
-    
-    if user_id not in data.get('joined', {}):  # Track joined status in the JSON
-        bot.send_message(user_id, "Please make sure you have joined all the required channels!")
-        time.sleep(2)  # Simulating wait for user confirmation
-        bot.answer_callback_query(call.id, "Please join the required channels and try again.")
+
+    # Check if the user has joined the required bots
+    if not data['joined'].get(user_id, False):  # If not joined yet
+        bot.send_message(user_id, "❗ *It seems you haven't joined all required bots.*\nPlease join each bot and click Continue again.", parse_mode="Markdown")
+        join_required(user_id)  # Re-send the join links
+        bot.answer_callback_query(call.id, "Please complete joining to proceed.")
     else:
+        # If joined, access rewards or main menu
         bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
         menu(user_id)
 
@@ -142,31 +155,14 @@ def trx_address(message):
         with open('users.json', 'r') as file:
             data = json.load(file)
         data['wallet'][user_id_str] = message.text
+        data['joined'][user_id_str] = True  # Mark that the user has joined all bots
         with open('users.json', 'w') as file:
             json.dump(data, file)
-        bot.send_message(message.chat.id, "✅ Wallet address set successfully.")
+        bot.send_message(message.chat.id, "✅ Wallet address saved successfully.", parse_mode="Markdown")
         menu(message.chat.id)
     else:
         bot.send_message(message.chat.id, "❌ Invalid wallet address.")
-        menu(message.chat.id)
+        trx_address(message)
 
-def amo_with(message):
-    try:
-        amount = float(message.text)
-        user_id_str = str(message.chat.id)
-        with open('users.json', 'r') as file:
-            data = json.load(file)
-        balance = data['balance'].get(user_id_str, 0)
-        
-        if Mini_Withdraw <= amount <= balance:
-            data['balance'][user_id_str] -= amount
-            with open('users.json', 'w') as file:
-                json.dump(data, file)
-            bot.send_message(message.chat.id, f"✅ Withdrawal of {amount} tokens initiated.")
-        else:
-            bot.send_message(message.chat.id, "❌ Invalid withdrawal amount.")
-        menu(message.chat.id)
-    except ValueError:
-        bot.send_message(message.chat.id, "❌ Invalid input. Please enter a number.")
-
-bot.polling(none_stop=True)
+if __name__ == "__main__":
+    bot.polling(none_stop=True)
