@@ -63,9 +63,20 @@ def start(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "continue")
 def continue_callback(call):
-    user_id = call.message.chat.id
-    bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
-    menu(user_id)
+    user_id = str(call.message.chat.id)
+    
+    # Verification logic - If verification API is available, place it here.
+    # For now, let's proceed with a simple prompt assuming user has manually checked
+    with open('users.json', 'r') as file:
+        data = json.load(file)
+    
+    if user_id not in data.get('joined', {}):  # Track joined status in the JSON
+        bot.send_message(user_id, "Please make sure you have joined all the required channels!")
+        time.sleep(2)  # Simulating wait for user confirmation
+        bot.answer_callback_query(call.id, "Please join the required channels and try again.")
+    else:
+        bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
+        menu(user_id)
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -153,10 +164,9 @@ def amo_with(message):
                 json.dump(data, file)
             bot.send_message(message.chat.id, f"✅ Withdrawal of {amount} tokens initiated.")
         else:
-            bot.send_message(message.chat.id, f"❌ Invalid amount. Minimum withdrawal is {Mini_Withdraw} tokens.")
+            bot.send_message(message.chat.id, "❌ Invalid withdrawal amount.")
+        menu(message.chat.id)
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Please enter a valid amount.")
-    except Exception as e:
-        bot.send_message(message.chat.id, "An error occurred. Please try again later.")
+        bot.send_message(message.chat.id, "❌ Invalid input. Please enter a number.")
 
-bot.polling()
+bot.polling(none_stop=True)
