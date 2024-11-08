@@ -1,7 +1,8 @@
+import time
 import json
 import telebot
 
-# Define constants
+# TOKEN DETAILS
 BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"
 Daily_bonus = 0.5  # Daily bonus amount
 Mini_Withdraw = 1  # Minimum withdrawal amount
@@ -9,14 +10,6 @@ Per_Refer = 0.5  # Referral bonus amount
 
 bot = telebot.TeleBot(BOT_TOKEN)
 bonus = {}
-
-# Required bot links
-required_bots = {
-    'Bum': "https://t.me/blum/app?startapp=ref_DWusEZ3TeD",
-    'OKX Racer': "https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953",
-    'Kolo': "https://t.me/kolo?start=ref_7060686316",
-    'NotPixel': "https://t.me/notpixel/app?startapp=f7060686316"
-}
 
 def menu(user_id):
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
@@ -26,12 +19,14 @@ def menu(user_id):
     bot.send_message(user_id, "*🏡 Home*", parse_mode="Markdown", reply_markup=keyboard)
 
 def join_required(user_id):
-    # Display the bot join links and continue button
     keyboard = telebot.types.InlineKeyboardMarkup()
-    for bot_name, link in required_bots.items():
-        keyboard.add(telebot.types.InlineKeyboardButton(f"Join {bot_name}", url=link))
+    # Each button will have a URL link for the bot invite
+    keyboard.add(telebot.types.InlineKeyboardButton("Join Bum", url="https://t.me/blum/app?startapp=ref_DWusEZ3TeD"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Join OKX Racer", url="https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Join Kolo", url="https://t.me/kolo?start=ref_7060686316"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Join NotPixel", url="https://t.me/notpixel/app?startapp=f7060686316"))
+    # Continue button to access rewards only after joining
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
-    
     bot.send_message(user_id, "*To qualify for a reward, please join the following bots:*\n\nClick each link to join, then press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
 @bot.message_handler(commands=['start'])
@@ -42,22 +37,8 @@ def start(message):
         with open('users.json', 'r') as file:
             data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
-        data = {
-            "checkin": {},
-            "withd": {},
-            "DailyQuiz": {},
-            "id": {},
-            "total": 0,
-            "referred": {},
-            "referby": {},
-            "balance": {},
-            "wallet": {},
-            "refer": {},
-            "totalwith": 0,
-            "joined": {}
-        }
-
-    # Initialize user fields if not already present
+        data = {"referred": {}, "referby": {}, "balance": {}, "wallet": {}, "total": 0}
+    
     if user_id not in data['referred']:
         data['referred'][user_id] = 0
         data['total'] += 1
@@ -72,9 +53,6 @@ def start(message):
         data['balance'][user_id] = 0
     if user_id not in data['wallet']:
         data['wallet'][user_id] = "none"
-    if user_id not in data['joined']:
-        # Initialize 'joined' state for each bot
-        data['joined'][user_id] = {bot_name: False for bot_name in required_bots}
 
     with open('users.json', 'w') as file:
         json.dump(data, file)
@@ -85,22 +63,10 @@ def start(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "continue")
 def continue_callback(call):
-    user_id = str(call.message.chat.id)
-
-    # Load user data
-    with open('users.json', 'r') as file:
-        data = json.load(file)
-
-    # Check if the user has joined all required bots
-    if all(data['joined'][user_id].values()):  # If all bots are joined
-        # User can proceed
-        bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
-        menu(user_id)
-    else:
-        # If not all bots are joined
-        bot.send_message(user_id, "❗ *It seems you haven't joined all required bots.*\nPlease join each bot and click Continue again.", parse_mode="Markdown")
-        join_required(user_id)  # Re-send the join links
-        bot.answer_callback_query(call.id, "Please complete joining to proceed.")
+    user_id = call.message.chat.id
+    bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
+    bot.send_message(user_id, "If you have not joined, you will receive no reward.", parse_mode="Markdown")
+    menu(user_id)
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -166,15 +132,32 @@ def trx_address(message):
         with open('users.json', 'r') as file:
             data = json.load(file)
         data['wallet'][user_id_str] = message.text
-        # Mark user as having joined all bots
-        data['joined'][user_id_str] = {bot_name: True for bot_name in required_bots}
         with open('users.json', 'w') as file:
             json.dump(data, file)
-        bot.send_message(message.chat.id, "✅ Wallet address saved successfully.", parse_mode="Markdown")
+        bot.send_message(message.chat.id, "✅ Wallet address set successfully.")
         menu(message.chat.id)
     else:
         bot.send_message(message.chat.id, "❌ Invalid wallet address.")
-        trx_address(message)
+        menu(message.chat.id)
 
-if __name__ == "__main__":
-    bot.polling(none_stop=True)
+def amo_with(message):
+    try:
+        amount = float(message.text)
+        user_id_str = str(message.chat.id)
+        with open('users.json', 'r') as file:
+            data = json.load(file)
+        balance = data['balance'].get(user_id_str, 0)
+        
+        if Mini_Withdraw <= amount <= balance:
+            data['balance'][user_id_str] -= amount
+            with open('users.json', 'w') as file:
+                json.dump(data, file)
+            bot.send_message(message.chat.id, f"✅ Withdrawal of {amount} tokens initiated. You will receive if the Flying Paisa Coin is launched in the coming days.")
+        else:
+            bot.send_message(message.chat.id, f"❌ Invalid amount. Minimum withdrawal is {Mini_Withdraw} tokens.")
+    except ValueError:
+        bot.send_message(message.chat.id, "❌ Please enter a valid amount.")
+    except Exception as e:
+        bot.send_message(message.chat.id, "An error occurred. Please try again later.")
+
+bot.polling()
