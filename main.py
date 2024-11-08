@@ -10,6 +10,14 @@ Per_Refer = 0.5  # Referral bonus amount
 bot = telebot.TeleBot(BOT_TOKEN)
 bonus = {}
 
+# Required bot links
+required_bots = {
+    'Bum': "https://t.me/blum/app?startapp=ref_DWusEZ3TeD",
+    'OKX Racer': "https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953",
+    'Kolo': "https://t.me/kolo?start=ref_7060686316",
+    'NotPixel': "https://t.me/notpixel/app?startapp=f7060686316"
+}
+
 def menu(user_id):
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row('🆔 Account')
@@ -18,12 +26,12 @@ def menu(user_id):
     bot.send_message(user_id, "*🏡 Home*", parse_mode="Markdown", reply_markup=keyboard)
 
 def join_required(user_id):
+    # Display the bot join links and continue button
     keyboard = telebot.types.InlineKeyboardMarkup()
-    keyboard.add(telebot.types.InlineKeyboardButton("Join Bum", url="https://t.me/blum/app?startapp=ref_DWusEZ3TeD"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join OKX Racer", url="https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join Kolo", url="https://t.me/kolo?start=ref_7060686316"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join NotPixel", url="https://t.me/notpixel/app?startapp=f7060686316"))
+    for bot_name, link in required_bots.items():
+        keyboard.add(telebot.types.InlineKeyboardButton(f"Join {bot_name}", url=link))
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
+    
     bot.send_message(user_id, "*To qualify for a reward, please join the following bots:*\n\nClick each link to join, then press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
 @bot.message_handler(commands=['start'])
@@ -49,6 +57,7 @@ def start(message):
             "joined": {}
         }
 
+    # Initialize user fields if not already present
     if user_id not in data['referred']:
         data['referred'][user_id] = 0
         data['total'] += 1
@@ -64,7 +73,8 @@ def start(message):
     if user_id not in data['wallet']:
         data['wallet'][user_id] = "none"
     if user_id not in data['joined']:
-        data['joined'][user_id] = False  # Initially, the user hasn't joined the bots
+        # Initialize 'joined' state for each bot
+        data['joined'][user_id] = {bot_name: False for bot_name in required_bots}
 
     with open('users.json', 'w') as file:
         json.dump(data, file)
@@ -81,15 +91,16 @@ def continue_callback(call):
     with open('users.json', 'r') as file:
         data = json.load(file)
 
-    # Check if the user has joined the required bots
-    if not data['joined'].get(user_id, False):  # If not joined yet
+    # Check if the user has joined all required bots
+    if all(data['joined'][user_id].values()):  # If all bots are joined
+        # User can proceed
+        bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
+        menu(user_id)
+    else:
+        # If not all bots are joined
         bot.send_message(user_id, "❗ *It seems you haven't joined all required bots.*\nPlease join each bot and click Continue again.", parse_mode="Markdown")
         join_required(user_id)  # Re-send the join links
         bot.answer_callback_query(call.id, "Please complete joining to proceed.")
-    else:
-        # If joined, access rewards or main menu
-        bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
-        menu(user_id)
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -155,7 +166,8 @@ def trx_address(message):
         with open('users.json', 'r') as file:
             data = json.load(file)
         data['wallet'][user_id_str] = message.text
-        data['joined'][user_id_str] = True  # Mark that the user has joined all bots
+        # Mark user as having joined all bots
+        data['joined'][user_id_str] = {bot_name: True for bot_name in required_bots}
         with open('users.json', 'w') as file:
             json.dump(data, file)
         bot.send_message(message.chat.id, "✅ Wallet address saved successfully.", parse_mode="Markdown")
