@@ -3,8 +3,8 @@ import json
 import telebot
 
 # TOKEN DETAILS
-BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"
-Daily_bonus = 0.5  # Daily bonus amount
+BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"  # Replace with your actual bot token
+Daily_bonus = 1  # Daily bonus amount
 Mini_Withdraw = 1  # Minimum withdrawal amount
 Per_Refer = 0.5  # Referral bonus amount
 
@@ -20,12 +20,10 @@ def menu(user_id):
 
 def join_required(user_id):
     keyboard = telebot.types.InlineKeyboardMarkup()
-    # Each button will have a URL link for the bot invite
     keyboard.add(telebot.types.InlineKeyboardButton("Join Banana", url="https://t.me/OfficialBananaBot/banana?startapp=referral=CF1JDI6"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join OKX Racer", url="https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join Kolo", url="https://t.me/kolo?start=ref_7060686316"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join NotPixel", url="https://t.me/notpixel/app?startapp=f7060686316"))
-    # Continue button to access rewards only after joining
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
     bot.send_message(user_id, "*To qualify for a reward, please join the following bots:*\n\nClick each link to join, then press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
@@ -33,7 +31,6 @@ def join_required(user_id):
 def start(message):
     user_id = str(message.chat.id)
     try:
-        # Load or initialize user data
         with open('users.json', 'r') as file:
             data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
@@ -45,7 +42,6 @@ def start(message):
     if user_id not in data['referby']:
         data['referby'][user_id] = message.text.split()[1] if len(message.text.split()) > 1 else user_id
         if data['referby'][user_id] != user_id:
-            # Add referral bonus
             referrer = data['referby'][user_id]
             data['referred'][referrer] += 1
             data['balance'][referrer] = data['balance'].get(referrer, 0) + Per_Refer
@@ -57,7 +53,6 @@ def start(message):
     with open('users.json', 'w') as file:
         json.dump(data, file)
 
-    # Send welcome message and ask user to join required bots
     bot.send_message(user_id, "*Welcome to the bot!*", parse_mode="Markdown")
     join_required(user_id)
 
@@ -152,9 +147,13 @@ def amo_with(message):
             data['balance'][user_id_str] -= amount
             with open('users.json', 'w') as file:
                 json.dump(data, file)
-            bot.send_message(message.chat.id, f"✅ Withdrawal of {amount} tokens initiated. You will receive if the Flying Paisa Coin is launched in the coming days.")
             keyboard = telebot.types.InlineKeyboardMarkup()
             keyboard.add(telebot.types.InlineKeyboardButton("Claim 100 Flying Paisa", url="https://www.mintme.com/token/Flying-Paisa/airdrop"))
+            bot.send_message(
+                message.chat.id,
+                f"✅ Withdrawal of {amount} tokens initiated. You will receive if the Flying Paisa Coin is launched in the coming days.",
+                reply_markup=keyboard
+            )
         else:
             bot.send_message(message.chat.id, f"❌ Invalid amount. Minimum withdrawal is {Mini_Withdraw} tokens.")
     except ValueError:
