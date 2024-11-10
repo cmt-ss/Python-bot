@@ -86,14 +86,14 @@ def send_text(message):
             ref_count = data['referred'].get(user_id_str, 0)
             bot_name = bot.get_me().username
             ref_link = f'https://telegram.me/{bot_name}?start={user_id}'
-            msg = f"*⏯️ Total Invites: {ref_count} Users\n\n🔗 Referral Link: {ref_link}*"
+            msg = f"*⏯️ Total Invites: {ref_count} Users\nNeed 1 referral to withdraw\n\n🔗 Referral Link: {ref_link}*"
             bot.send_message(user_id, msg, parse_mode="Markdown")
 
         elif message.text == '🎁 Bonus':
             cur_time = int(time.time())
             if (user_id not in bonus.keys()) or (cur_time - bonus[user_id] > 86400):
                 data['balance'][user_id_str] += Daily_bonus
-                bot.send_message(user_id, f"Congrats! You received {Daily_bonus} tokens.")
+                bot.send_message(user_id, f"Congrats! You received {Daily_bonus} tokens. Need 1 referral to withdraw.")
                 bonus[user_id] = cur_time
                 with open('users.json', 'w') as file:
                     json.dump(data, file)
