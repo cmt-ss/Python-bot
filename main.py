@@ -4,7 +4,7 @@ import telebot
 
 # TOKEN DETAILS
 BOT_TOKEN = "8163670935:AAGcGrcVD21EnL0UIEQdY4MkKg41ZrqQ8dM"  # Replace with your actual bot token
-Daily_bonus = 100.75  # Daily bonus amount
+Daily_bonus = 80.75  # Daily bonus amount
 Mini_Withdraw = 5  # Minimum withdrawal amount
 Per_Refer = 0.5  # Referral bonus amount
 
@@ -25,7 +25,7 @@ def join_required(user_id):
     keyboard.add(telebot.types.InlineKeyboardButton("Join Crypto Village", url="https://t.me/cryptopakistanvillage"))
     keyboard.add(telebot.types.InlineKeyboardButton("Join TronKeeper", url="https://t.me/TronKeeperBot/app?startapp=6997032778"))
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
-    bot.send_message(user_id, "*To qualify for a reward, please join the following bots:*\n\nClick each link to join, then press Continue.", parse_mode="Markdown", reply_markup=keyboard)
+    bot.send_message(user_id, "*To qualify for a reward, do the following tasks and comment your Telegram username in the YouTube comments*\n\nThen press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -60,7 +60,7 @@ def start(message):
 def continue_callback(call):
     user_id = call.message.chat.id
     bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
-    bot.send_message(user_id, "If you have not joined, you will receive no reward.", parse_mode="Markdown")
+    bot.send_message(user_id, "🚨 Attention! If you have not joined, you will NOT receive any rewards.", parse_mode="Markdown")
     menu(user_id)
 
 @bot.message_handler(content_types=['text'])
@@ -81,7 +81,7 @@ def send_text(message):
             ref_count = data['referred'].get(user_id_str, 0)
             bot_name = bot.get_me().username
             ref_link = f'https://telegram.me/{bot_name}?start={user_id}'
-            msg = f"*⏯️ Total Invites: {ref_count} Users\nNeed 1 referral to withdraw\n\n🔗 Referral Link: {ref_link}*"
+            msg = f"*⏯️ Total Invites: {ref_count} Users\nNeed 5 referral to withdraw\n\n🔗 Referral Link: {ref_link}*"
             bot.send_message(user_id, msg, parse_mode="Markdown")
 
         elif message.text == '🎁 Bonus':
@@ -151,7 +151,7 @@ def amo_with(message):
             keyboard.add(telebot.types.InlineKeyboardButton("Claim 100 Flying Paisa", url="https://www.mintme.com/token/Flying-Paisa/airdrop"))
             bot.send_message(
                 message.chat.id,
-                f"✅ Withdrawal of {amount} tokens initiated. You will receive if the Flying Paisa Coin is launched in the coming days.",
+                f"✅ Withdrawal of {amount} tokens initiated. You will receive rewards once the Flying Paisa Coin is launched in the coming days. Stay tuned to our YouTube channel! ",
                 reply_markup=keyboard
             )
         else:
