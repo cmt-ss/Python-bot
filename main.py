@@ -88,7 +88,7 @@ def send_text(message):
             cur_time = int(time.time())
             if (user_id not in bonus.keys()) or (cur_time - bonus[user_id] > 86400):
                 data['balance'][user_id_str] += Daily_bonus
-                bot.send_message(user_id, f"Congrats! You received {Daily_bonus} tokens. Need 1 referral to withdraw.")
+                bot.send_message(user_id, f"Congrats! You received {Daily_bonus} tokens. Need 5 referral to withdraw.")
                 bonus[user_id] = cur_time
                 with open('users.json', 'w') as file:
                     json.dump(data, file)
