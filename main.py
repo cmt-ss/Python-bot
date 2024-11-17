@@ -4,9 +4,9 @@ import telebot
 
 # TOKEN DETAILS
 BOT_TOKEN = "8163670935:AAGcGrcVD21EnL0UIEQdY4MkKg41ZrqQ8dM"  # Replace with your actual bot token
-Daily_bonus = 80.75  # Daily bonus amount
+Daily_bonus = 0.75  # Daily bonus amount
 Mini_Withdraw = 5  # Minimum withdrawal amount
-Per_Refer = 0.5  # Referral bonus amount
+Per_Refer = 0.7  # Referral bonus amount
 
 bot = telebot.TeleBot(BOT_TOKEN)
 bonus = {}
