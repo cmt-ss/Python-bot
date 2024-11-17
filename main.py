@@ -3,9 +3,9 @@ import json
 import telebot
 
 # TOKEN DETAILS
-BOT_TOKEN = "7462875981:AAGmUrEzKk75j7XjuPSVuAGiT2_drDdLv_0"  # Replace with your actual bot token
-Daily_bonus = 1  # Daily bonus amount
-Mini_Withdraw = 1  # Minimum withdrawal amount
+BOT_TOKEN = "8163670935:AAGcGrcVD21EnL0UIEQdY4MkKg41ZrqQ8dM"  # Replace with your actual bot token
+Daily_bonus = 0.75  # Daily bonus amount
+Mini_Withdraw = 5  # Minimum withdrawal amount
 Per_Refer = 0.5  # Referral bonus amount
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -20,10 +20,10 @@ def menu(user_id):
 
 def join_required(user_id):
     keyboard = telebot.types.InlineKeyboardMarkup()
-    keyboard.add(telebot.types.InlineKeyboardButton("Join Banana", url="https://t.me/OfficialBananaBot/banana?startapp=referral=CF1JDI6"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join OKX Racer", url="https://t.me/OKX_official_bot/OKX_Racer?startapp=linkCode_130623953"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join Kolo", url="https://t.me/kolo?start=ref_7060686316"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join NotPixel", url="https://t.me/notpixel/app?startapp=f7060686316"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Subscribe Youtube", url="https://youtube.com/@flyingpaisa"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Join Fox", url="https://t.me/thefoxcoin_bot/foxcoin?startapp=bKuYBhA6R"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Join Crypto Village", url="https://t.me/cryptopakistanvillage"))
+    keyboard.add(telebot.types.InlineKeyboardButton("Join TronKeeper", url="https://t.me/TronKeeperBot/app?startapp=6997032778"))
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
     bot.send_message(user_id, "*To qualify for a reward, please join the following bots:*\n\nClick each link to join, then press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
