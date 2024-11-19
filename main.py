@@ -4,9 +4,9 @@ import telebot
 
 # TOKEN DETAILS
 BOT_TOKEN = "8163670935:AAGcGrcVD21EnL0UIEQdY4MkKg41ZrqQ8dM"  # Replace with your actual bot token
-Daily_bonus = 0.75  # Daily bonus amount
-Mini_Withdraw = 5  # Minimum withdrawal amount
-Per_Refer = 0.7  # Referral bonus amount
+Daily_bonus = 0.25  # Daily bonus amount
+Mini_Withdraw = 2  # Minimum withdrawal amount
+Per_Refer = 0.9  # Referral bonus amount
 
 bot = telebot.TeleBot(BOT_TOKEN)
 bonus = {}
@@ -20,12 +20,11 @@ def menu(user_id):
 
 def join_required(user_id):
     keyboard = telebot.types.InlineKeyboardMarkup()
-    keyboard.add(telebot.types.InlineKeyboardButton("Subscribe Youtube", url="https://youtube.com/@flyingpaisa"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join Fox", url="https://t.me/thefoxcoin_bot/foxcoin?startapp=bKuYBhA6R"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join Crypto Village", url="https://t.me/cryptopakistanvillage"))
-    keyboard.add(telebot.types.InlineKeyboardButton("Join TronKeeper", url="https://t.me/TronKeeperBot/app?startapp=6997032778"))
+    keyboard.add(telebot.types.InlineKeyboardButton("1️⃣ Subscribe Youtube", url="https://youtube.com/@flyingpaisa"))
+    keyboard.add(telebot.types.InlineKeyboardButton("2️⃣ Join CELO", url="https://t.me/CeloEmergeBot?start=7060686316"))
+    keyboard.add(telebot.types.InlineKeyboardButton("3️⃣ Join TronKeeper", url="https://t.me/TronKeeperBot/app?startapp=6997032778"))
     keyboard.add(telebot.types.InlineKeyboardButton("Continue", callback_data="continue"))
-    bot.send_message(user_id, "*To qualify for a reward, do the following tasks and comment your Telegram username in the YouTube comments*\n\nThen press Continue.", parse_mode="Markdown", reply_markup=keyboard)
+    bot.send_message(user_id, "*To qualify for reward, subscribe to our YouTube channel and comment your Telegram username on the video. We will manually verify*\n\nThen press Continue.", parse_mode="Markdown", reply_markup=keyboard)
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -60,7 +59,7 @@ def start(message):
 def continue_callback(call):
     user_id = call.message.chat.id
     bot.send_message(user_id, "*Thank you for joining! Accessing rewards...*", parse_mode="Markdown")
-    bot.send_message(user_id, "🚨 Attention! If you have not joined, you will NOT receive any rewards.", parse_mode="Markdown")
+    bot.send_message(user_id, "🚨 Attention! If you have not subscribed to YouTube, you will NOT receive any rewards.", parse_mode="Markdown")
     menu(user_id)
 
 @bot.message_handler(content_types=['text'])
@@ -81,14 +80,14 @@ def send_text(message):
             ref_count = data['referred'].get(user_id_str, 0)
             bot_name = bot.get_me().username
             ref_link = f'https://telegram.me/{bot_name}?start={user_id}'
-            msg = f"*⏯️ Total Invites: {ref_count} Users\nNeed 5 referral to withdraw\n\n🔗 Referral Link: {ref_link}*"
+            msg = f"*⏯️ Total Invites: {ref_count} Users\nNeed 2 referral to withdraw\n\n🔗 Referral Link: {ref_link}*"
             bot.send_message(user_id, msg, parse_mode="Markdown")
 
         elif message.text == '🎁 Bonus':
             cur_time = int(time.time())
             if (user_id not in bonus.keys()) or (cur_time - bonus[user_id] > 86400):
                 data['balance'][user_id_str] += Daily_bonus
-                bot.send_message(user_id, f"Congrats! You received {Daily_bonus} tokens. Need 5 referral to withdraw.")
+                bot.send_message(user_id, f"Congrats! You received {Daily_bonus} tokens. Need 2 referral to withdraw.")
                 bonus[user_id] = cur_time
                 with open('users.json', 'w') as file:
                     json.dump(data, file)
@@ -98,7 +97,7 @@ def send_text(message):
         elif message.text == '⚙️ Set Wallet':
             keyboard = telebot.types.ReplyKeyboardMarkup(True)
             keyboard.row('🚫 Cancel')
-            send = bot.send_message(user_id, "_⚠️ Send your TRX wallet address._", parse_mode="Markdown", reply_markup=keyboard)
+            send = bot.send_message(user_id, "_⚠️ Send your BNB Smart Chain (BNB) wallet address._", parse_mode="Markdown", reply_markup=keyboard)
             bot.register_next_step_handler(send, trx_address)
 
         elif message.text == "📊 Statistics":
@@ -123,7 +122,7 @@ def trx_address(message):
     user_id_str = str(message.chat.id)
     if message.text == "🚫 Cancel":
         return menu(message.chat.id)
-    elif len(message.text) == 34:
+    elif len(message.text) == 42:
         with open('users.json', 'r') as file:
             data = json.load(file)
         data['wallet'][user_id_str] = message.text
